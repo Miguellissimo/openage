@@ -294,7 +294,7 @@ bool Engine::draw_debug_overlay() {
 		"%s", config::config_option_string
 	);
 
-	profiler_draw(true);
+	this->profiler.show(true);
 
 	return true;
 }
@@ -309,10 +309,6 @@ void Engine::run() {
 void Engine::stop() {
 	this->job_manager->stop();
 	this->running = false;
-}
-
-void Engine::profiler_draw(bool debug_mode) {
-	profiler.show(debug_mode);
 }
 
 void Engine::loop() {
