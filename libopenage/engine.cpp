@@ -415,7 +415,6 @@ void Engine::loop() {
 
 			if (this->drawing_debug_overlay.value) {
 				this->draw_debug_overlay();
-
 			}
 
 			if (this->drawing_huds.value) {
@@ -432,7 +431,6 @@ void Engine::loop() {
 		util::gl_check_error();
 
 		this->profiler.end_measure("rendering");
-
 		this->profiler.start_measure("idle", {0.0, 0.0, 1.0});
 
 		// the rendering is done
