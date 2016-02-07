@@ -5,3 +5,5 @@ add_sources(libopenage
 	terrain_outline.cpp
 	terrain_search.cpp
 )
+
+add_subdirectory(generation)

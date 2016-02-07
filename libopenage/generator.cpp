@@ -5,6 +5,11 @@
 #include "game_save.h"
 #include "game_spec.h"
 #include "generator.h"
+#include "terrain/generation/terrain_generation.h"
+#include "terrain/generation/arena_generator.h"
+#include <iostream>
+#include <iterator>
+#include <algorithm>
 
 namespace openage {
 
@@ -219,6 +224,8 @@ void Generator::create_regions() {
 	int p_area = this->getv<int>("player_area");
 	int p_radius = this->getv<int>("player_radius");
 
+
+
 	// enforce some lower limits
 	size = std::max(1, size);
 	base_id = std::max(0, base_id);
@@ -227,9 +234,10 @@ void Generator::create_regions() {
 
 	rng::RNG rng(seed);
 	Region base(size * 16);
-	base.terrain_id = base_id;
+	base.terrain_id = 1;
 	std::vector<Region> player_regions;
 
+	/*
 	int player_count = this->player_names().size() - 1;
 	for (int i = 0; i < player_count; ++i) {
 		log::log(MSG(dbg) << "generate player " << i);
@@ -284,7 +292,7 @@ void Generator::create_regions() {
 		extra_trees.object_id = 349;
 		player_regions.push_back(extra_trees);
 	}
-
+	*/
 	// set regions
 	this->regions.clear();
 	this->regions.push_back(base);
@@ -295,14 +303,31 @@ void Generator::create_regions() {
 
 
 std::shared_ptr<Terrain> Generator::terrain() const {
-	auto terrain = std::make_shared<Terrain>(this->spec->get_terrain_meta(), true);
-	for (auto &r : this->regions) {
-		for (auto &tile : r.get_tiles()) {
-			TerrainChunk *chunk = terrain->get_create_chunk(tile);
-			chunk->get_data(tile)->terrain_id = r.terrain_id;
-		}
-	}
+
+    auto terrain = std::make_shared<Terrain>(this->spec->get_terrain_meta(), true);
+
+    //int size = this->getv<int>("terrain_size");
+    //size = std::max(1, size);
+
+    std::vector<PlaceableUnit> vec_pu = generate_arena_map(this->spec, terrain, 32, climate::NORMAL);
+    std::copy(vec_pu.begin(), vec_pu.end(), std::back_inserter(placeable_units));
+
+//	for (auto &r : this->regions) {
+//		for (auto &tile : r.get_tiles()) {
+//			TerrainChunk *chunk = terrain->get_create_chunk(tile);
+//			chunk->get_data(tile)->terrain_id = r.terrain_id;
+//		}
+//	}
 	return terrain;
+}
+
+void Generator::place_units(GameMain &m) const {
+	std::cout << "placed_units called" << std::endl;
+	for (auto pu : this->placeable_units) {
+		Player &p = m.players[0];
+		auto otype = this->spec->get_type(pu.unit_id);
+		m.placed_units.new_unit(*otype, p, pu.tile.to_tile3().to_phys3());
+	}
 }
 
 void Generator::add_units(GameMain &m) const {

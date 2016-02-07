@@ -30,6 +30,12 @@ constexpr coord::tile_delta const neigh_tiles[] = {
 	{ 0, -1}
 };
 
+struct PlaceableUnit {
+	coord::tile tile;
+	int owner_id;
+	int unit_id;
+};
+
 /**
  * A region is a set of tiles around a starting point,
  * including functions to create child regions
@@ -144,6 +150,8 @@ public:
 	 */
 	void add_units(GameMain &m) const;
 
+	void place_units(GameMain &m) const;
+
 	bool create();
 
 private:
@@ -157,6 +165,8 @@ private:
 
 	// the generated data
 	std::vector<Region> regions;
+
+	mutable std::vector<PlaceableUnit> placeable_units;
 
 };
 

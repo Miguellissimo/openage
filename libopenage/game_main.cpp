@@ -19,7 +19,8 @@ GameMain::GameMain(const Generator &generator)
 	}
 
 	this->placed_units.set_terrain(this->terrain);
-	generator.add_units(*this);
+	//generator.add_units(*this);
+	generator.place_units(*this);
 }
 
 GameMain::~GameMain() {
