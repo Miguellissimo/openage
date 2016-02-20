@@ -325,9 +325,13 @@ std::shared_ptr<Terrain> Generator::terrain() const {
 void Generator::place_units(GameMain &m) const {
 	std::cout << "placed_units called" << std::endl;
 	for (auto pu : this->placeable_units) {
-		Player &p = m.players[0];
+		Player &p = m.players[pu.second.owner_id];
 		auto otype = this->spec->get_type(pu.second.unit_id);
-		m.placed_units.new_unit(*otype, p, pu.first.to_tile3().to_phys3());
+		auto ref = m.placed_units.new_unit(*otype, p, pu.first.to_tile3().to_phys3());
+
+		if (pu.second.building) {
+			complete_building(*ref.get());
+		}
 	}
 }
 

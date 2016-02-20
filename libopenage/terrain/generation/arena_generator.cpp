@@ -23,6 +23,44 @@ void to_file(float **terrain, int size) {
     }
 }
 
+Region player_area(int player_owner) {
+    tileset_t rect;
+
+    for (auto ne = 20; ne != 31; ++ne) {
+        for (auto se = 5; se != 16; ++se) {
+            rect.insert({ne, se});
+        }
+    }
+
+    Region area(rect);
+    for (auto tile : area) {
+        area.tile_types[tile] = terrain_type::DRYED_GRAS;
+    }
+
+    // place stone
+    area.units[{22, 6}] = {player_owner, 102};
+    area.units[{23, 6}] = {player_owner, 102};
+    area.units[{23, 7}] = {player_owner, 102};
+
+    // place gold
+    area.units[{29, 12}] = {player_owner, 66};
+    area.units[{28, 12}] = {player_owner, 66};
+    area.units[{30, 11}] = {player_owner, 66};
+    area.units[{27, 13}] = {player_owner, 66};
+    area.units[{28, 13}] = {player_owner, 66};
+
+    // place sheeps
+    area.units[{23, 13}] = {player_owner, 594};
+    area.units[{24, 12}] = {player_owner, 594};
+
+    // place TC and villagers
+    area.units[{25, 7}] = {player_owner, 109, true};
+    area.units[{22, 9}] = {player_owner, 83};
+    area.units[{29, 11}] = {player_owner, 293};
+
+    return area;
+}
+
 std::vector<std::pair<const coord::tile, PlaceableUnit>> generate_arena_map(std::shared_ptr<GameSpec> spec, std::shared_ptr<Terrain> terrain, int size, climate c) {
 
     // gather available tiles due to climate
@@ -34,6 +72,7 @@ std::vector<std::pair<const coord::tile, PlaceableUnit>> generate_arena_map(std:
 
     // calculate rectangle place for player regions
     //todo
+    Region p1 = player_area(1);
 
     // create forrest region
     Region forrest = Region::create_from(generated_map, size, 0.1f, terrain_type::FORREST);
@@ -43,16 +82,15 @@ std::vector<std::pair<const coord::tile, PlaceableUnit>> generate_arena_map(std:
     Region base = Region::create_from(generated_map, size, 0.1f, 1.0f, terrain_type::GRAS);
     base.populate(349, 0.05f);
 
-    Region final = Region::merge(base, forrest);
+    Region final = Region::merge(forrest, p1);
     std::cout << "final region: " << final.size() << std::endl;
     
     // store placeable units
     std::vector<std::pair<const coord::tile, PlaceableUnit>> vec_pu;
-    std::copy(final.units.begin(), 
-        final.units.end(),
+    std::copy(p1.units.begin(), 
+        p1.units.end(),
         std::back_inserter(vec_pu)); 
 
-    //auto merged = Region::merge(forrest, base);
     final.convert_to_terrain(terrain);
 
     // cleanup generated map array

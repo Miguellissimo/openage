@@ -45,6 +45,10 @@ terrain_tiles_for_climate get_climate_tiles(climate c);
 struct PlaceableUnit {
 	int owner_id;
 	int unit_id;
+	bool building;
+
+	PlaceableUnit() : owner_id(0), unit_id(0), building(false) { };
+	PlaceableUnit(int o_id, int u_id, bool b = false) : owner_id(o_id), unit_id(u_id), building(b) { };
 };
 
 class TileComparator
