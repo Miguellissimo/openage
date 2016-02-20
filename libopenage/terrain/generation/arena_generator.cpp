@@ -23,31 +23,37 @@ void to_file(float **terrain, int size) {
     }
 }
 
-std::vector<PlaceableUnit> generate_arena_map(std::shared_ptr<GameSpec> spec, std::shared_ptr<Terrain> terrain, int size, climate c) {
+std::vector<std::pair<const coord::tile, PlaceableUnit>> generate_arena_map(std::shared_ptr<GameSpec> spec, std::shared_ptr<Terrain> terrain, int size, climate c) {
 
     // gather available tiles due to climate
     terrain_tiles_for_climate tt = get_climate_tiles(c);
 
-    // apply hill algorithm
-    float ** generated_map = hill_generation(size, 15);
+    // apply hill algorithm and generate heightmap
+    heightmap_t generated_map = hill_generation(size, 15);
+    to_file(generated_map, size);
 
+    // calculate rectangle place for player regions
+    //todo
+
+    // create forrest region
+    Region forrest = Region::create_from(generated_map, size, 0.1f, terrain_type::FORREST);
+    forrest.populate(349, 1.0f);
+
+    // create base region
+    Region base = Region::create_from(generated_map, size, 0.1f, 1.0f, terrain_type::GRAS);
+    base.populate(349, 0.05f);
+
+    Region final = Region::merge(base, forrest);
+    std::cout << "final region: " << final.size() << std::endl;
+    
     // store placeable units
-    std::vector<PlaceableUnit> vec_pu;
+    std::vector<std::pair<const coord::tile, PlaceableUnit>> vec_pu;
+    std::copy(final.units.begin(), 
+        final.units.end(),
+        std::back_inserter(vec_pu)); 
 
-    // convert matrix to tiles
-    for (auto row = 0; row != size; ++row) {
-        for (auto col = 0; col != size; ++col) {
-            coord::tile current_tile{row, col};
-            TerrainChunk *chunk = terrain->get_create_chunk(current_tile);
-
-            if (generated_map[row][col] <= 0.3) {
-                chunk->get_data(current_tile)->terrain_id = terrain_type::FORREST;
-                vec_pu.push_back({current_tile, 0, 349});
-            } else {
-                chunk->get_data(current_tile)->terrain_id = tt.base[0];
-            }
-        }
-    }
+    //auto merged = Region::merge(forrest, base);
+    final.convert_to_terrain(terrain);
 
     // cleanup generated map array
     for(auto i = 0; i != size; ++i) {

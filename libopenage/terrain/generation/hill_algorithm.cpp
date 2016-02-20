@@ -11,13 +11,8 @@ struct point {
     unsigned int c;
 };
 
-float z(double mid_r, double mid_c, point p, float r, float &max_val) {
+float z(double mid_r, double mid_c, point p, float r) {
     auto val = std::pow(r, 2) - (std::pow(p.c - mid_c, 2) + std::pow(p.r - mid_r, 2));
-
-    if (val > max_val) {
-        max_val = val;
-    }
-
     return val > 0 ? val : 0;
 }
 
@@ -54,8 +49,8 @@ float ** hill_generation(long size, int iterations) {
         auto m1 = dis(gen);
         auto m2 = dis(gen);
 
-        std::normal_distribution<> nd1(m1 * size, 0.3f * size);
-        std::normal_distribution<> nd2(m2 * size, 0.3f * size);
+        std::normal_distribution<> nd1(m1 * size, 0.1f * size);
+        std::normal_distribution<> nd2(m2 * size, 0.1f * size);
         auto mid_r = nd1(gen);
         auto mid_c = nd2(gen);
 
@@ -66,7 +61,11 @@ float ** hill_generation(long size, int iterations) {
 
         for (unsigned int row = 0; row != size; ++row) {
             for (unsigned int col = 0; col != size; ++col) {
-                terrain[row][col] += z(mid_r, mid_c, point{row, col}, rad, max_val);
+                terrain[row][col] += z(mid_r, mid_c, point{row, col}, rad);
+
+                if (terrain[row][col] > max_val) {
+                    max_val = terrain[row][col];
+                }
             }
         }
     }

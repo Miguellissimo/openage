@@ -13,114 +13,114 @@
 
 namespace openage {
 
-coord::tile random_tile(rng::RNG &rng, tileset_t tiles) {
-	if (tiles.empty()) {
-		log::log(MSG(err) << "random tile failed");
-		return coord::tile{0, 0};
-	}
-	uint64_t index = rng.random() % tiles.size();
-	auto it = std::begin(tiles);
-	std::advance(it, index);
-	return *it;
-}
+//coord::tile random_tile(rng::RNG &rng, tileset_t tiles) {
+//	if (tiles.empty()) {
+//		log::log(MSG(err) << "random tile failed");
+//		return coord::tile{0, 0};
+//	}
+//	uint64_t index = rng.random() % tiles.size();
+//	auto it = std::begin(tiles);
+//	std::advance(it, index);
+//	return *it;
+//}
 
-
-Region::Region(int size)
-	:
-	owner{0},
-	object_id{0},
-	terrain_id{0},
-	center{0, 0} {
-	for (int ne = -size; ne < size; ++ne) {
-		for (int se = -size; se < size; ++se) {
-			this->tiles.emplace(coord::tile{ne, se});
-		}
-	}
-}
-
-Region::Region(coord::tile center, tileset_t tiles)
-	:
-	owner{0},
-	object_id{0},
-	terrain_id{0},
-	center(center),
-	tiles{tiles} {
-}
-
-tileset_t Region::get_tiles() const {
-	return this->tiles;
-}
-
-coord::tile Region::get_center() const {
-	return this->center;
-}
-
-coord::tile Region::get_tile(rng::RNG &rng) const {
-	return random_tile(rng, this->tiles);
-}
-
-
-tileset_t Region::subset(rng::RNG &rng, coord::tile start_point, unsigned int number, double p) const {
-	if (p == 0.0) {
-		return tileset_t();
-	}
-
-	// the set of included tiles
-	std::unordered_set<coord::tile> subtiles;
-	subtiles.emplace(start_point);
-
-	// outside layer of tiles
-	std::unordered_set<coord::tile> edge_set;
-
-	while (subtiles.size() < number) {
-		if (edge_set.empty()) {
-
-			// try fill the edge list
-			for (auto &t : subtiles) {
-
-				// check adjacent tiles
-				for (int i = 0; i < 4; ++i) {
-					coord::tile adj = t + neigh_tiles[i];
-					if (this->tiles.count(adj) &&
-						!subtiles.count(adj)) {
-						edge_set.emplace(adj);
-					}
-				}
-			}
-			if (edge_set.empty()) {
-
-				// unable to grow further
-				return subtiles;
-			}
-		}
-
-		// transfer a random tile
-		coord::tile next_tile = random_tile(rng, edge_set);
-		edge_set.erase(next_tile);
-		if (rng.probability(p)) {
-			subtiles.emplace(next_tile);
-		}
-	}
-	return subtiles;
-}
-
-Region Region::take_tiles(rng::RNG &rng, coord::tile start_point, unsigned int number, double p) {
-
-	tileset_t new_set = this->subset(rng, start_point, number, p);
-
-	// erase from current set
-	for (auto &t: new_set) {
-		this->tiles.erase(t);
-	}
-
-	Region new_region(start_point, new_set);
-	new_region.terrain_id = this->terrain_id;
-	return new_region;
-}
-
-Region Region::take_random(rng::RNG &rng, unsigned int number, double p) {
-	return this->take_tiles(rng, this->get_tile(rng), number, p);
-}
+//
+//Region::Region(int size)
+//	:
+//	owner{0},
+//	object_id{0},
+//	terrain_id{0},
+//	center{0, 0} {
+//	for (int ne = -size; ne < size; ++ne) {
+//		for (int se = -size; se < size; ++se) {
+//			this->tiles.emplace(coord::tile{ne, se});
+//		}
+//	}
+//}
+//
+//Region::Region(coord::tile center, tileset_t tiles)
+//	:
+//	owner{0},
+//	object_id{0},
+//	terrain_id{0},
+//	center(center),
+//	tiles{tiles} {
+//}
+//
+//tileset_t Region::get_tiles() const {
+//	return this->tiles;
+//}
+//
+//coord::tile Region::get_center() const {
+//	return this->center;
+//}
+//
+//coord::tile Region::get_tile(rng::RNG &rng) const {
+//	return random_tile(rng, this->tiles);
+//}
+//
+//
+//tileset_t Region::subset(rng::RNG &rng, coord::tile start_point, unsigned int number, double p) const {
+//	if (p == 0.0) {
+//		return tileset_t();
+//	}
+//
+//	// the set of included tiles
+//	std::unordered_set<coord::tile> subtiles;
+//	subtiles.emplace(start_point);
+//
+//	// outside layer of tiles
+//	std::unordered_set<coord::tile> edge_set;
+//
+//	while (subtiles.size() < number) {
+//		if (edge_set.empty()) {
+//
+//			// try fill the edge list
+//			for (auto &t : subtiles) {
+//
+//				// check adjacent tiles
+//				for (int i = 0; i < 4; ++i) {
+//					coord::tile adj = t + neigh_tiles[i];
+//					if (this->tiles.count(adj) &&
+//						!subtiles.count(adj)) {
+//						edge_set.emplace(adj);
+//					}
+//				}
+//			}
+//			if (edge_set.empty()) {
+//
+//				// unable to grow further
+//				return subtiles;
+//			}
+//		}
+//
+//		// transfer a random tile
+//		coord::tile next_tile = random_tile(rng, edge_set);
+//		edge_set.erase(next_tile);
+//		if (rng.probability(p)) {
+//			subtiles.emplace(next_tile);
+//		}
+//	}
+//	return subtiles;
+//}
+//
+//Region Region::take_tiles(rng::RNG &rng, coord::tile start_point, unsigned int number, double p) {
+//
+//	tileset_t new_set = this->subset(rng, start_point, number, p);
+//
+//	// erase from current set
+//	for (auto &t: new_set) {
+//		this->tiles.erase(t);
+//	}
+//
+//	Region new_region(start_point, new_set);
+//	new_region.terrain_id = this->terrain_id;
+//	return new_region;
+//}
+//
+//Region Region::take_random(rng::RNG &rng, unsigned int number, double p) {
+//	return this->take_tiles(rng, this->get_tile(rng), number, p);
+//}
 
 Generator::Generator(Engine *engine)
 	:
@@ -162,7 +162,7 @@ Generator::Generator(Engine *engine)
 		auto filename = this->get_variable("load_filename").value<std::string>();
 
 		// create an empty game
-		this->regions.clear();
+//		this->regions.clear();
 		engine.start_game(*this);
 		gameio::load(engine.get_game(), filename);
 		return options::OptionValue("Game loaded");
@@ -232,10 +232,10 @@ void Generator::create_regions() {
 	p_area = std::max(50, p_area);
 	p_radius = std::max(2, p_radius);
 
-	rng::RNG rng(seed);
-	Region base(size * 16);
-	base.terrain_id = 1;
-	std::vector<Region> player_regions;
+//	rng::RNG rng(seed);
+//	Region base(size * 16);
+//	base.terrain_id = 1;
+//	std::vector<Region> player_regions;
 
 	/*
 	int player_count = this->player_names().size() - 1;
@@ -294,11 +294,11 @@ void Generator::create_regions() {
 	}
 	*/
 	// set regions
-	this->regions.clear();
-	this->regions.push_back(base);
-	for (auto &r : player_regions) {
-		this->regions.push_back(r);
-	}
+//	this->regions.clear();
+//	this->regions.push_back(base);
+//	for (auto &r : player_regions) {
+//		this->regions.push_back(r);
+//	}
 }
 
 
@@ -309,7 +309,8 @@ std::shared_ptr<Terrain> Generator::terrain() const {
     //int size = this->getv<int>("terrain_size");
     //size = std::max(1, size);
 
-    std::vector<PlaceableUnit> vec_pu = generate_arena_map(this->spec, terrain, 32, climate::NORMAL);
+    std::vector<std::pair<const coord::tile, PlaceableUnit>> vec_pu = generate_arena_map(this->spec, terrain, 32, climate::NORMAL);
+    placeable_units.clear();
     std::copy(vec_pu.begin(), vec_pu.end(), std::back_inserter(placeable_units));
 
 //	for (auto &r : this->regions) {
@@ -325,49 +326,49 @@ void Generator::place_units(GameMain &m) const {
 	std::cout << "placed_units called" << std::endl;
 	for (auto pu : this->placeable_units) {
 		Player &p = m.players[0];
-		auto otype = this->spec->get_type(pu.unit_id);
-		m.placed_units.new_unit(*otype, p, pu.tile.to_tile3().to_phys3());
+		auto otype = this->spec->get_type(pu.second.unit_id);
+		m.placed_units.new_unit(*otype, p, pu.first.to_tile3().to_phys3());
 	}
 }
 
 void Generator::add_units(GameMain &m) const {
-	for (auto &r : this->regions) {
-
-		// Regions filled with resource objects
-		// trees / mines
-		if (r.object_id) {
-			Player &p = m.players[r.owner];
-			auto otype = this->spec->get_type(r.object_id);
-			for (auto &tile : r.get_tiles()) {
-				m.placed_units.new_unit(*otype, p, tile.to_tile3().to_phys3());
-			}
-		}
-
-		// A space for starting town center and villagers
-		else if (r.owner) {
-			Player &p = m.players[r.owner];
-			auto tctype = this->spec->get_type(109); // town center
-			auto mvtype = this->spec->get_type(83);  // male villager
-			auto fvtype = this->spec->get_type(293); // female villager
-			coord::tile tile = r.get_center();
-			tile.ne -= 1;
-			tile.se -= 1;
-
-			// Place a completed town center
-			auto ref = m.placed_units.new_unit(*tctype, p, tile.to_tile3().to_phys3());
-			if (ref.is_valid()) {
-				complete_building(*ref.get());
-			}
-
-			// Place three villagers
-			tile.ne -= 1;
-			m.placed_units.new_unit(*fvtype, p, tile.to_tile3().to_phys3());
-			tile.se += 1;
-			m.placed_units.new_unit(*mvtype, p, tile.to_tile3().to_phys3());
-			tile.se += 1;
-			m.placed_units.new_unit(*fvtype, p, tile.to_tile3().to_phys3());
-		}
-	}
+//	for (auto &r : this->regions) {
+//
+//		// Regions filled with resource objects
+//		// trees / mines
+//		if (r.object_id) {
+//			Player &p = m.players[r.owner];
+//			auto otype = this->spec->get_type(r.object_id);
+//			for (auto &tile : r.get_tiles()) {
+//				m.placed_units.new_unit(*otype, p, tile.to_tile3().to_phys3());
+//			}
+//		}
+//
+//		// A space for starting town center and villagers
+//		else if (r.owner) {
+//			Player &p = m.players[r.owner];
+//			auto tctype = this->spec->get_type(109); // town center
+//			auto mvtype = this->spec->get_type(83);  // male villager
+//			auto fvtype = this->spec->get_type(293); // female villager
+//			coord::tile tile = r.get_center();
+//			tile.ne -= 1;
+//			tile.se -= 1;
+//
+//			// Place a completed town center
+//			auto ref = m.placed_units.new_unit(*tctype, p, tile.to_tile3().to_phys3());
+//			if (ref.is_valid()) {
+//				complete_building(*ref.get());
+//			}
+//
+//			// Place three villagers
+//			tile.ne -= 1;
+//			m.placed_units.new_unit(*fvtype, p, tile.to_tile3().to_phys3());
+//			tile.se += 1;
+//			m.placed_units.new_unit(*mvtype, p, tile.to_tile3().to_phys3());
+//			tile.se += 1;
+//			m.placed_units.new_unit(*fvtype, p, tile.to_tile3().to_phys3());
+//		}
+//	}
 }
 
 bool Generator::create() {

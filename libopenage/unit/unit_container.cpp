@@ -95,6 +95,7 @@ UnitReference UnitContainer::new_unit(UnitType &type,
                                       Player &owner,
                                       coord::phys3 position) {
 	auto newobj = std::make_unique<Unit>(*this, next_new_id++);
+	//newobj->add_attribute(std::make_shared<Attribute<attr_type::direction>>(coord::phys3_delta{ 1, 0, 0 }));
 
 	// try placing unit at this location
 	auto terrain_shared = this->get_terrain();
